@@ -1,0 +1,2 @@
+[url "https://gitlab+deploy-token-15:${GITLAB_TOKEN}@gitlab.dot.co.id/"]
+  insteadOf = https://gitlab.dot.co.id/
