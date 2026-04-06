@@ -1,0 +1,2 @@
+[develop]
+dot_semeru ansible_host=semeru.devnstg.com ansible_port=37470

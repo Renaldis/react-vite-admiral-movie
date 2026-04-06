@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+      <script type="module">
+      if (import.meta.env.DEV) {
+        // Helper to extract React Fiber debug source from a DOM element
+        function getReactFiberDebugSource(element) {
+          if (!element) return null;
+
+          // Find the React Fiber key on the DOM element
+          const fiberKey = Object.keys(element).find(
+            key => key.startsWith('__reactFiber$') || key.startsWith('__reactInternalInstance$')
+          );
+
+          if (!fiberKey) return null;
+
+          const fiber = element[fiberKey];
+          const sources = [];
+
+          // Traverse up the fiber tree to collect all debug sources
+          let currentFiber = fiber;
+          while (currentFiber) {
+            if (currentFiber._debugSource) {
+              const source = currentFiber._debugSource;
+              sources.push({
+                fileName: source.fileName,
+                lineNumber: source.lineNumber,
+                columnNumber: source.columnNumber,
+                componentName: currentFiber.type?.name || currentFiber.type?.displayName || 'Anonymous'
+              });
+            }
+            currentFiber = currentFiber.return;
+          }
+
+          return sources;
+        }
+
+        import("react-grab").then(() => {
+          __REACT_GRAB__.updateOptions({
+            onCopySuccess: (elements, content, ...args) => {
+              // Extract source info from the first selected element
+              const firstElement = elements?.[0];
+              const debugSources = firstElement ? getReactFiberDebugSource(firstElement) : [];
+              debugSources.splice(debugSources.findIndex(({ fileName }) => fileName.includes('src/libs/react-router/transformers/route.tsx')))
+
+              // Format the source location info
+              const sourceInfo = debugSources.length > 0
+                ? debugSources.map(s =>
+                  `  ${s.componentName}: ${s.fileName}:${s.lineNumber}:${s.columnNumber}`
+                ).join('\n')
+                : '  (No source info available)';
+
+              const cleanContent = typeof content === 'string'
+                ? content.replace(/\n\s*in\s+[^\n]*/g, '')
+                : content;
+
+              const verboseContent = `
+  === Trace Information ===
+  Page URL: ${window.location.href}
+  Component Path: ${window.location.pathname}
+
+  --- Content ---
+  ${cleanContent}
+
+  --- Source Locations (Component Stack) ---
+  ${sourceInfo}
+  ==================
+  `.trim();
+
+              navigator.clipboard
+                .writeText(verboseContent)
+                .then(() => {
+                  console.log("Copied extended context with source info to clipboard.");
+                  console.log("Debug sources:", debugSources);
+                })
+            },
+          })
+        });
+      }
+    </script>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data: https:; connect-src 'self' https:;">
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite Admiral</title>
+    <meta name="description" content="My Awesome App description" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="mask-icon" href="/mask-icon.svg" color="#FFFFFF" />
+    <meta name="theme-color" content="#ffffff" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
