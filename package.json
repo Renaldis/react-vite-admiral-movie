@@ -41,7 +41,7 @@
     "@types/react": "^18.3.27",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react-swc": "^3.11.0",
-    "admiral": "git+https://gitlab.dot.co.id/design-system/admiral#v2.0.0-beta.99",
+    "admiral": "git+https://${GITLAB_USERNAME}:${GITLAB_TOKEN}@gitlab.dot.co.id/design-system/admiral#v2.0.0-beta.99",
     "debug": "^4.4.3",
     "eslint": "^9.39.2",
     "eslint-plugin-react-hooks": "5.1.0-rc-fb9a90fa48-20240614",
