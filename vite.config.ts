@@ -64,6 +64,7 @@ export default defineConfig({
       avif: {
         quality: 60,
       },
+      exclude: ["**/cache/**"],
     }),
   ],
   resolve: {

@@ -1,27 +1,10 @@
-import { FC, Fragment, PropsWithChildren, ReactNode, useMemo } from "react";
-import { useSession } from "../providers/session";
+import { FC, PropsWithChildren, ReactNode } from "react";
 
 type TProps = PropsWithChildren<{
-  permissions: Array<string>;
+  permissions?: Array<string>; // optional
   fallback?: ReactNode;
 }>;
 
-export const Guard: FC<TProps> = (props): ReactNode => {
-  const { session } = useSession();
-
-  const permissionKeys = useMemo(
-    () =>
-      session?.user?.roles?.map((role) => role.permissions.map((perm) => perm.name))?.flat() || [],
-    [session?.user?.roles],
-  );
-
-  const allowed = useMemo(() => {
-    return props.permissions.every((permission) => permissionKeys.includes(permission));
-  }, [permissionKeys, props.permissions]);
-
-  if (allowed) {
-    return <Fragment>{props.children}</Fragment>;
-  }
-
-  return props.fallback;
+export const Guard: FC<TProps> = ({ children }) => {
+  return <>{children}</>;
 };

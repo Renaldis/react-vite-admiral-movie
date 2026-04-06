@@ -1,24 +1,25 @@
-import type { FC, ReactElement } from "react";
+import { FC } from "react";
 import { LayoutWithHeader } from "admiral";
-import { Outlet } from "react-router";
+import { Outlet, Navigate } from "react-router";
 import { SIDEBAR_ITEMS } from "@/commons/constants/sidebar";
-import { filterPermission } from "@/utils/permission";
-import { Flex, Grid, Typography } from "antd";
+import { Flex, Grid, Typography, Spin } from "antd";
 import { useSession } from "../providers/session";
 
-export const ProtectedLayout: FC = (): ReactElement => {
-  const { session } = useSession();
-  const userPermissions =
-    session?.user?.roles?.map((role) => role.permissions?.map((perm) => perm.name)).flat() || [];
-
+export const ProtectedLayout: FC = () => {
+  const { session, status } = useSession();
   const { md } = Grid.useBreakpoint();
 
-  const filteredItems = filterPermission(
-    SIDEBAR_ITEMS,
-    (item) =>
-      item.permissions === undefined ||
-      item.permissions.some((permission) => userPermissions.includes(permission)),
-  );
+  if (status === "authenticating") {
+    return (
+      <Flex justify="center" align="center" style={{ height: "100vh" }}>
+        <Spin size="large" />
+      </Flex>
+    );
+  }
+
+  if (!session) {
+    return <Navigate to="/auth/login" replace />;
+  }
 
   return (
     <LayoutWithHeader
@@ -40,7 +41,7 @@ export const ProtectedLayout: FC = (): ReactElement => {
       }}
       sidebar={{
         width: 250,
-        menu: filteredItems,
+        menu: SIDEBAR_ITEMS, // 🔥 langsung pakai tanpa filter
         theme: "light",
       }}
     >

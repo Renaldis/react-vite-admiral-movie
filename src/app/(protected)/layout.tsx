@@ -1,35 +1,25 @@
 import type { FC, ReactElement } from "react";
 import { LayoutWithHeader } from "admiral";
-import { Outlet } from "react-router";
+import { Navigate, Outlet } from "react-router";
 import { SIDEBAR_ITEMS } from "@/commons/constants/sidebar";
-import { filterPermission } from "@/utils/permission";
 import { Flex, Typography } from "antd";
 import { useSession } from "../_components/providers/session";
 
-const ProtectedLayout: FC = (): ReactElement => {
-  const { session } = useSession();
-  const userPermissions =
-    session?.user?.roles?.map((role) => role.permissions?.map((perm) => perm.name)).flat() || [];
+const ProtectedLayout: FC = (): ReactElement | null => {
+  const { session, status } = useSession();
 
-  const filteredItems = filterPermission(
-    SIDEBAR_ITEMS,
-    (item) =>
-      item.permissions === undefined ||
-      item.permissions.some((permission) => userPermissions.includes(permission)),
-  );
+  if (status === "authenticating") return null;
+
+  if (!session) {
+    return <Navigate to="/auth/login" replace />;
+  }
 
   return (
     <LayoutWithHeader
       header={{
         brandLogo: (
           <Flex align="center" gap={8}>
-            <Typography.Title
-              level={4}
-              style={{
-                marginBottom: 0,
-                whiteSpace: "nowrap",
-              }}
-            >
+            <Typography.Title level={4} style={{ marginBottom: 0 }}>
               Vite Admiral
             </Typography.Title>
           </Flex>
@@ -37,7 +27,7 @@ const ProtectedLayout: FC = (): ReactElement => {
       }}
       sidebar={{
         width: 250,
-        menu: filteredItems,
+        menu: SIDEBAR_ITEMS,
         theme: "light",
       }}
     >
